@@ -39,20 +39,22 @@ def main():
         if args.umrechnung != None:
             for i in range(0,len(args.umrechnung)):
                 einh[i][1]=args.umrechnung[i]
-        einh.sort(key=lambda x: x[1])
+    einh.sort(key=lambda x: x[1])
+    einh.reverse()
     p("Einheiten= "+str(einh), 6)
     p("Stueckelung= "+str(stueck), 6)
     p("Wechselgeldbetrag= "+str(args.Wechselgeld),6)
     a=args.Wechselgeld
     betrag=dict()
     betrag[a]=[0, muenzzahl_zero(stueck)]
-    p("Urspruengliches dictionary" + str(betrag),8)
-    for s in reversed(stueck):
-        p("Pruefe Muenze mit Wert " + str(s),9)
+    p("Urspruengliches dictionary" + str(betrag),10)
+    for s in stueck:
+        p("Pruefe Muenze mit Wert " + str(s),11)
         for b in reversed(sorted(betrag.keys())):
             while b>0:
-                p("Pruefe ausgehend von Betrag" + str(b), 10)
-                z=b-s
+                p("Pruefe ausgehend von Betrag" + str(b), 12)
+                z=round(b-s,6) #6 willkürlich gewählt
+                p("z="+str(z),11)
                 if z in betrag:
                     if betrag[z][0]>betrag[b][0]+1:
                         betrag[z]=[betrag[b][0]+1, copy.copy(betrag[b][1])]
@@ -62,13 +64,13 @@ def main():
                     betrag[z][1][s]=betrag[z][1][s]+1
                 b=z
 
-            
+
     p("fertig", 8)
-    p(betrag,10)
-    p("\n\n",10)
+    p(betrag,12)
+    p("\n\n",12)
     p("Gebraucht werden "+str(betrag[0.0][0])+" Geldstuecke", 0)
     p("Beste Stueckelung:",5)
-    pst(betrag[0][1],5)
+    pst(betrag[0][1], einh, 5)
 
         
 
@@ -113,20 +115,34 @@ def steinh(stri):
     if stri in ["e","euro"]:
         return [["c", 0.01],["E", 1]]
     elif stri in ["T"]:
-        return [["Pfennige", 1],["Groschen", 12], ["1/12 Taler", 24], ["Taler",288]]
+        return [ ["Pfennige", 1],["Groschen", 12], ["1/12 Taler", 24],["1/6 Taler", 48],["1/4 Taler", 72],["1/3 Taler", 96],["1/2 Taler", 144], ["Taler",288]]
     else:
         return [["Einheiten",1]]
 
 
 
 
-def pst(std, v):
+def pst(std, einh,  v):
+    p("printing output aus "+str(std),9)
     for st in sorted(std.keys()):
         if std[st]>0:
-            p(str(std[st])+" mal "+str(st), v)
+            p(str(std[st])+" mal "+streinh(st, einh), v)
 
 
 
+def streinh(wert, einh):
+    p("Einheitsumwandlung aus "+str(wert),10)
+    stri=""
+    for e in einh:
+        z=0
+        p("e="+str(e), 10)        
+        while wert>=e[1]:
+            z=z+1
+            wert=round(wert-e[1],6) #Willkuerl 6
+            p("z="+str(z), 10)
+        if z>0:
+            stri=stri+str(z)+ " " + e[0]+" "
+    return stri
 
 
         
