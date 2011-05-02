@@ -54,17 +54,18 @@ def main():
     b=a
     while b>0:
         p("/nGehe aus von key "+str(b),11)
-        for s in stueck:
-            p("Pruefe Muenze mit Wert " + str(s),12)
-            z=round(b-s,6) #6 willkürlich gewählt
-            p("z="+str(z),11)
-            if z in betrag:
-                if betrag[z][0]>betrag[b][0]+1:
+        if b in betrag:
+            for s in stueck:
+                p("Pruefe Muenze mit Wert " + str(s),12)
+                z=round(b-s,6) #6 willkürlich gewählt
+                p("z="+str(z),11)
+                if z in betrag:
+                    if betrag[z][0]>betrag[b][0]+1:
+                        betrag[z]=[betrag[b][0]+1, copy.copy(betrag[b][1])]
+                        betrag[z][1][s]=betrag[z][1][s]+1
+                else:
                     betrag[z]=[betrag[b][0]+1, copy.copy(betrag[b][1])]
                     betrag[z][1][s]=betrag[z][1][s]+1
-            else:
-                betrag[z]=[betrag[b][0]+1, copy.copy(betrag[b][1])]
-                betrag[z][1][s]=betrag[z][1][s]+1
         b=b-minstep
 
     p("fertig", 8)
