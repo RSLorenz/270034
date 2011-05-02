@@ -48,34 +48,46 @@ def main():
     betrag=dict()
     betrag[a]=[0, muenzzahl_zero(stueck)]
     p("Urspruengliches dictionary" + str(betrag),10)
-    for s in stueck:
-        p("Pruefe Muenze mit Wert " + str(s),11)
-        for b in reversed(sorted(betrag.keys())):
-            while b>0:
-                p("Pruefe ausgehend von Betrag" + str(b), 12)
-                z=round(b-s,6) #6 willkürlich gewählt
-                p("z="+str(z),11)
-                if z in betrag:
-                    if betrag[z][0]>betrag[b][0]+1:
-                        betrag[z]=[betrag[b][0]+1, copy.copy(betrag[b][1])]
-                        betrag[z][1][s]=betrag[z][1][s]+1
-                else:
+
+    minstep=1
+
+
+    while b>0:
+        p("/nGehe aus von key "+str(b),11)
+        for s in stueck:
+            p("Pruefe Muenze mit Wert " + str(s),12)
+            z=round(b-s,6) #6 willkürlich gewählt
+            p("z="+str(z),11)
+            if z in betrag:
+                if betrag[z][0]>betrag[b][0]+1:
                     betrag[z]=[betrag[b][0]+1, copy.copy(betrag[b][1])]
                     betrag[z][1][s]=betrag[z][1][s]+1
-                b=z
-
+            else:
+                betrag[z]=[betrag[b][0]+1, copy.copy(betrag[b][1])]
+                betrag[z][1][s]=betrag[z][1][s]+1
+        b=b-minstep
 
     p("fertig", 8)
     p(betrag,12)
     p("\n\n",12)
-    p("Gebraucht werden "+str(betrag[0.0][0])+" Geldstuecke", 0)
-    p("Beste Stueckelung:",5)
-    pst(betrag[0][1], einh, 5)
+    if 0.0 in betrag:
+        i=0
+    else:
+        i=max(betrag.keys(), key=negval)
+        p("Kein exaktes Resultat!", 5)
+        p("Gib "+str(-i) + "zuviel heraus. Insgesamt: " + str(a-i), 4)
 
-        
+    p("Gebraucht werden "+str(betrag[i][0])+" Geldstuecke", 0)
+    p("Beste Stueckelung:",5)
+    pst(betrag[i][1], einh, 5)
+
 
     
-
+def negval(v):
+    if v<0:
+        return v
+    else:
+        return None
 
                 
 
