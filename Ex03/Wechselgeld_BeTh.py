@@ -51,7 +51,7 @@ def main():
 
     minstep=findminstep(stueck[0])
 
-
+    b=a
     while b>0:
         p("/nGehe aus von key "+str(b),11)
         for s in stueck:
@@ -91,7 +91,7 @@ def negval(v):
 
 def findminstep(z):
     n=0
-    while true:
+    while True:
         if z>10**-n:
             return 10**-n
         n=n+1
