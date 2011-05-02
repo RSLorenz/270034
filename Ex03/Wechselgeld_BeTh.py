@@ -66,7 +66,7 @@ def main():
                 else:
                     betrag[z]=[betrag[b][0]+1, copy.copy(betrag[b][1])]
                     betrag[z][1][s]=betrag[z][1][s]+1
-        b=b-minstep
+        b=round(b-minstep,10)
 
     p("fertig", 8)
     p(betrag,12)
