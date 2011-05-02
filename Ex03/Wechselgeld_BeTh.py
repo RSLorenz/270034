@@ -49,7 +49,7 @@ def main():
     betrag[a]=[0, muenzzahl_zero(stueck)]
     p("Urspruengliches dictionary" + str(betrag),10)
 
-    minstep=1
+    minstep=findminstep(stueck[0])
 
 
     while b>0:
@@ -87,9 +87,14 @@ def negval(v):
     if v<0:
         return v
     else:
-        return None
+        return float('-inf')
 
-                
+def findminstep(z):
+    n=0
+    while true:
+        if z>10**-n:
+            return 10**-n
+        n=n+1
 
 def muenzzahl_zero(stueck):
     l=dict()
