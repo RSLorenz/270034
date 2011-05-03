@@ -167,7 +167,7 @@ def steinh(stri):
 def rek_stueckgen(funktstri, maxstueck):
     for ch in funktstri:
         if ch=="^":
-
+            pass
 
 
 def pst(std, einh,  v):
