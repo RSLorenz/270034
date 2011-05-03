@@ -17,6 +17,9 @@ def main():
     parser.add_argument("-w","--waehrung", nargs='+', help="Gibt das/die Waehrungssymbol(e) an, beginnend mit dem kleinsten!")
     parser.add_argument("-u","--umrechnung", nargs='*', type=float, default=1, help="Gibt die Gewichtung der einzelnen Waehrungssymbole an. Beispiel Euro: Wurden die Waehrungssymbole als E c eingegeben, so ist hier 1 0.01 einzugeben. Für die Waehrungssymbole c E reicht 0.01")
     parser.add_argument("-d","--d_stueck", nargs='?', choices=["e","euro","p10", "p100", "p10*", "p100*", "T"], help="Waehlt eine standard Stueckelung und Waehrungssymbole: e=euro, p10: 1 und Primzahlen bis 10, p100 1 und Primzahlen bis 100, ein angefüger Stern * nimmt 1 aus. T=Taler")
+    parser.add_argument("--allowoverkill", action=store_true, default=False, help="Das Programm berechnet auch Loesungen wo durch herausgabe von zuviel Geld Muenzen gespart werden koennen.")
+    parser.add_argument("--ok_proz", nargs=1, default=100, type=int, help="Nur sinnvoll wenn --allowoverkill angegeben ist. Limitiert den Bereich, in dem overkill-Loesungen gesucht werden auf den angegebenen prozentwert in bezug auf das herauszugebende Wechselgeld")
+
     args=parser.parse_args()
     _verbosity=args.v
     p("Input",10)
@@ -49,6 +52,12 @@ def main():
     betrag[a]=[0, muenzzahl_zero(stueck)]
     p("Urspruengliches dictionary" + str(betrag),10)
 
+    overk=args.allowoverkill
+    okproz=args.ok_proz
+    if okproz<0:
+        okproz=100
+
+ 
     minstep=findminstep(stueck[0])
 
     b=a
@@ -77,10 +86,23 @@ def main():
         i=max(betrag.keys(), key=negval)
         p("Kein exaktes Resultat!", 5)
         p("Gib "+str(-i) + " zuviel heraus. Insgesamt: " + str(a-i), 4)
-
     p("Gebraucht werden "+str(betrag[i][0])+" Geldstuecke", 0)
     p("Beste Stueckelung:",5)
     pst(betrag[i][1], einh, 5)
+    
+    bestst=betrag[i][1]
+    if overk==True:
+        while true:
+            i=round(i-minstep,6)
+            if i<-a*okproz/100:
+                break
+            if betrag[i][1]<bestst:
+                p("Alternative Loesung:",5)
+                p("Gib "+str(-i) + " zuviel heraus. Insgesamt: " + str(a-i), 4)
+                p("Gebraucht werden "+str(betrag[i][0])+" Geldstuecke", 0)
+                p("Beste Stueckelung:",5)
+                pst(betrag[i][1], einh, 5)
+
 
 
     
