@@ -18,7 +18,10 @@ def main():
     parser.add_argument("-u","--umrechnung", nargs='*', type=float, default=1, help="Gibt die Gewichtung der einzelnen Waehrungssymbole an. Beispiel Euro: Wurden die Waehrungssymbole als E c eingegeben, so ist hier 1 0.01 einzugeben. Für die Waehrungssymbole c E reicht 0.01")
     parser.add_argument("-d","--d_stueck", nargs='?', choices=["e","euro","p10", "p100", "p10*", "p100*", "T"], help="Waehlt eine standard Stueckelung und Waehrungssymbole: e=euro, p10: 1 und Primzahlen bis 10, p100 1 und Primzahlen bis 100, ein angefüger Stern * nimmt 1 aus. T=Taler")
     parser.add_argument("--allowoverkill", action=store_true, default=False, help="Das Programm berechnet auch Loesungen wo durch herausgabe von zuviel Geld Muenzen gespart werden koennen.")
-    parser.add_argument("--ok_proz", nargs=1, default=100, type=int, help="Nur sinnvoll wenn --allowoverkill angegeben ist. Limitiert den Bereich, in dem overkill-Loesungen gesucht werden auf den angegebenen prozentwert in bezug auf das herauszugebende Wechselgeld")
+    parser.add_argument("--ok_proz", nargs=1, default=00, type=int, help="Nur sinnvoll wenn --allowoverkill angegeben ist. Limitiert den Bereich, in dem overkill-Loesungen gesucht werden auf den angegebenen prozentwert in bezug auf das herauszugebende Wechselgeld")
+    parser.add_argument("--stgen_rek", help="Generiert die Stueckelung als Folge deren rekursive Darstellung als string angegeben wird. Unterstuetzt ZAHL (kleinstes Stueck, default 1) +ZAHL, *ZAHL ^ZAHL  Die Argumente werden als verkettete Funktionen verstanden mit der linkesten als innersten. Die Folge muss streng monoton steigen!")
+
+
 
     args=parser.parse_args()
     _verbosity=args.v
@@ -54,8 +57,7 @@ def main():
 
     overk=args.allowoverkill
     okproz=args.ok_proz
-    if okproz<0:
-        okproz=100
+
 
  
     minstep=findminstep(stueck[0])
@@ -94,8 +96,11 @@ def main():
     if overk==True:
         while True:
             i=round(i-minstep,6)
-            if i<-a*okproz/100:
-                break
+            if okproz>0:
+                if i<-a*okproz/100:
+                    break
+            if bestst<=a/stueck[-1]:
+                break 
             if betrag[i][1]<bestst:
                 p("Alternative Loesung:",5)
                 p("Gib "+str(-i) + " zuviel heraus. Insgesamt: " + str(a-i), 4)
@@ -159,6 +164,9 @@ def steinh(stri):
     else:
         return [["Einheiten",1]]
 
+def rek_stueckgen(funktstri, maxstueck):
+    for ch in funktstri:
+        if ch=="^":
 
 
 
