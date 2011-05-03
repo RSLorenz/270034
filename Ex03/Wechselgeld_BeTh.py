@@ -92,7 +92,7 @@ def main():
     
     bestst=betrag[i][1]
     if overk==True:
-        while true:
+        while True:
             i=round(i-minstep,6)
             if i<-a*okproz/100:
                 break
