@@ -1,0 +1,92 @@
+Liebe APBC-ler/innen,
+
+(1) Zufallssequenzen (unter Erhaltung der Buchstabenhaeufigkeiten):
+
+  (a) WUERFELN: Schreibe ein Programm, das eine Sequenze einliest die
+      Haufigkeiten der einzelnen Buchstaben des zugrundeliegenden
+      Alphabetes bestimmt und gemaesz dieser "gemessenen" Haufigkeiten neue
+      zufaellige Sequenzen mit der gleichen Laenge wie die der
+      urspruenglichen Sequenz erzeugt.
+
+      CUUUUGCUAG
+
+          |
+	  V
+      
+      A => 0.1             UGUACGCUGA
+      C => 0.2    -----\   ACCUUCAUCU
+      G => 0.2    -----/   UCUUCCUCCC
+      U => 0.5             GUGCAUUUGU
+
+      (Anmerkung: Dieser Methode liefert natuerlich nur im ststistischen
+       mittel Zufallssequenzen mit den urspruenglich gemessenen Buchstaben-
+       haefigkeiten. Jede einzelne Sequenz kann stark von diesen abweichen)
+      
+
+  (b) SHUFFELN: Schreibe ein Programm, das eine Sequenze einliest und durch
+      zufaelliges vertauschen (= shuffeln) der Buchstaben aus der
+      urspruenglichen Sequenze eine neue Zufallssequenz erzeugt, wobei die
+      Anzahl der Vertauschungen um eins kleiner sein soll als die Zahl der
+      Buchstaben in der Orginalsequenz.
+      
+      C <-+ G     G     G     G     G     G     G     G     G
+      U   | U <-+ C	C     C	    C	  C	C     C	    C
+      U   | U   | U <-+	U     U	    U	  U	U     U	    U
+      U   | U   | U   |	U <-+ C	    C	  C	C     C	    C
+      U   | U   | U <-+ U   | U <-+ G	  G	G     G	    G
+      G <-+ C <-+ U	U   | G   | G <-+ A	A     A	    A
+      C     C	  C	C <-+ U   | U   | U <-+	G     G	    G
+      U     U	  U	U     U   | U   | U   |	U <-+ U	    U
+      A     A	  A	A     A   | A <-+ G <-+	U   | U <-+ U
+      G     G	  G	G     G <-+ U	  U	U <-+ U <-+ U
+
+      (Anmerkung: Diese Methode erhaelt exakt die Haeufigkeiten der
+       Buchstaben der Orginalsequenz)
+
+(2) Zufallssequenzen (unter erhalt der k-lets)
+
+    Schreibe ein Programm, dasz eine Sequenz einliest und eine eine
+    zufaellige Sequenz erzeugt, welche die gleichen k-let Haeufigkeiten
+    besitzt wie die Orginalsequenz. Ein k-let ist eine subsequenz der
+    Laenge k (zB bein Dinukloeotid gehalt von Nukleinsaeuren ist k=2).
+
+    Der Shuffling Algorithmus funktioniert wie folgt:
+
+    (a) wenn die Sequenz k-let geshuffelt werden soll, bestimme man alle
+        Subsequenzen der der Laenge k-1. (Sprich fuer Dinukleotids
+        shuffling ist das das Sequenzalphabet, fuer Trinukleotide shuffling
+        sind das alle Dinucleotide usw.)
+
+     (b) die unter (a) bestimmten Subsequenzen bilden die Ecken eines
+         Graphen (der anfaenglich keine Kanten besitzt).
+
+	 CUUUUGCUAG
+
+             | fuer k=2
+	     V
+	 
+	    A  U
+
+	    G  C
+
+     (c) nun geht man den urspruenglichen Sequenze durch und setzt fuer
+         alle aufeinanderfolgenden k-lets eine entsprechende gerichtete
+         Kante in den Graphen ein, wobei zwei Ecken auch durch mehrere
+         Kanten verbunden sein koennen (Sprich wir bauen eigentlich einen
+         Multigraphen)
+	 
+                 +-----+
+                 |+---+|
+	         ||+-+||
+		 ||| |||
+                 vvv |||
+             A<---U--+++
+	     |  / ^^
+	     | /  ||
+	     vv   ||
+	      G-->C
+
+       (d) finde in diesem Multigraphen einen Eulerpfad. Ein Eulerpfad
+           durchwandert jede Kante des (Multi)Graphen exakt 1x.
+
+happy hacking
