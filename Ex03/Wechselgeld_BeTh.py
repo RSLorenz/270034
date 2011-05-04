@@ -15,11 +15,11 @@ def main():
     parser.add_argument("Wechselgeld" ,  help="Gibt das Geld an, das herausgegeben wird. Einheiten können optional NACHGESTELLT angegeben werden, wobei mit der groessten Einheit begonnen werden muss!", default=0)
     parser.add_argument("-s","--stueck", nargs='+', type=float, help="Manuelle Eingabe der Stueckelung. Nur ganze Zahlen sind erlaubt")
     parser.add_argument("-w","--waehrung", nargs='+', help="Gibt das/die Waehrungssymbol(e) an, beginnend mit dem kleinsten!")
-    parser.add_argument("-u","--umrechnung", nargs='*', type=float, default=1, help="Gibt die Gewichtung der einzelnen Waehrungssymbole an. Beispiel Euro: Wurden die Waehrungssymbole als E c eingegeben, so ist hier 1 0.01 einzugeben. Für die Waehrungssymbole c E reicht 0.01")
+    parser.add_argument("-u","--umrechnung", nargs='*', type=float, default=[1], help="Gibt die Gewichtung der einzelnen Waehrungssymbole an. Beispiel Euro: Wurden die Waehrungssymbole als E c eingegeben, so ist hier 1 0.01 einzugeben. Für die Waehrungssymbole c E reicht 0.01")
     parser.add_argument("-d","--d_stueck", nargs='?', choices=["e","euro","p10", "p100", "p10*", "p100*", "T"], help="Waehlt eine standard Stueckelung und Waehrungssymbole: e=euro, p10: 1 und Primzahlen bis 10, p100 1 und Primzahlen bis 100, ein angefüger Stern * nimmt 1 aus. T=Taler")
-    parser.add_argument("--allowoverkill", action=store_true, default=False, help="Das Programm berechnet auch Loesungen wo durch herausgabe von zuviel Geld Muenzen gespart werden koennen.")
-    parser.add_argument("--ok_proz", nargs=1, default=00, type=int, help="Nur sinnvoll wenn --allowoverkill angegeben ist. Limitiert den Bereich, in dem overkill-Loesungen gesucht werden auf den angegebenen prozentwert in bezug auf das herauszugebende Wechselgeld")
-    parser.add_argument("--stgen_rek", help="Generiert die Stueckelung als Folge deren rekursive Darstellung als string angegeben wird. Unterstuetzt ZAHL (kleinstes Stueck, default 1) +ZAHL, *ZAHL ^ZAHL  Die Argumente werden als verkettete Funktionen verstanden mit der linkesten als innersten. Die Folge muss streng monoton steigen!")
+    parser.add_argument("--allowoverkill", action='store_true', default=False, help="Das Programm berechnet auch Loesungen wo durch herausgabe von zuviel Geld Muenzen gespart werden koennen.")
+    parser.add_argument("--ok_proz", nargs=1, default=[0], type=int, help="Nur sinnvoll wenn --allowoverkill angegeben ist. Limitiert den Bereich, in dem overkill-Loesungen gesucht werden auf den angegebenen prozentwert in bezug auf das herauszugebende Wechselgeld")
+##    parser.add_argument("--stgen_rek", help="Generiert die Stueckelung als Folge deren rekursive Darstellung als string angegeben wird. Unterstuetzt ZAHL (kleinstes Stueck, default 1) +ZAHL, *ZAHL ^ZAHL  Die Argumente werden als verkettete Funktionen verstanden mit der linkesten als innersten. Die Folge muss streng monoton steigen!")
 
 
 
@@ -51,16 +51,22 @@ def main():
     p("Stueckelung= "+str(stueck), 6)
     p("Wechselgeldbetrag= "+str(args.Wechselgeld),6)
     a=geldberechnen(args.Wechselgeld, einh)
+    p("a="+str(a)+"Type:"+str(type(a)),8)
     betrag=dict()
     betrag[a]=[0, muenzzahl_zero(stueck)]
     p("Urspruengliches dictionary" + str(betrag),10)
 
     overk=args.allowoverkill
-    okproz=args.ok_proz
+    okproz=args.ok_proz[0]
+    p("OK_proz="+str(okproz)+" Typ: "+str(type(okproz)),9)
 
-
- 
-    minstep=findminstep(stueck[0])
+    m=0.0
+    minstep=float("inf")
+    for fst in stueck:
+        m=findminstep(fst)
+        if m<minstep:
+            minstep=m
+    p("Minstep= "+str(minstep),8)
 
     b=a
     while b>0:
@@ -92,22 +98,33 @@ def main():
     p("Beste Stueckelung:",5)
     pst(betrag[i][1], einh, 5)
     
-    bestst=betrag[i][1]
+    bestst=betrag[i][0]
+    exst=-stueck[-1]
     if overk==True:
-        while True:
-            i=round(i-minstep,6)
+        p("Berechne overkill solutions",7)
+        p("Betrag=",9)
+        p(betrag,9)
+        while i>exst:
+            i=round(i-minstep,10)
             if okproz>0:
                 if i<-a*okproz/100:
+                    p("okprozent Ausstieg",8)
                     break
-            if bestst<=a/stueck[-1]:
-                break 
-            if betrag[i][1]<bestst:
-                p("Alternative Loesung:",5)
-                p("Gib "+str(-i) + " zuviel heraus. Insgesamt: " + str(a-i), 4)
-                p("Gebraucht werden "+str(betrag[i][0])+" Geldstuecke", 0)
-                p("Beste Stueckelung:",5)
-                pst(betrag[i][1], einh, 5)
-
+            if i in betrag.keys():
+                p("in keys: i= " +str(i),10)
+                if betrag[i][0]<bestst:
+                    p("betrag[i][0]= "+str(betrag[i][1])+", bestst= ",8)
+                    p("\nAlternative Loesung:",5)
+                    p("Gib "+str(-i) + " zuviel heraus. Insgesamt: " + str(a-i), 0)
+                    p("Gebraucht werden "+str(betrag[i][0])+" Geldstuecke", 0)
+                    p("Beste Stueckelung:",5)
+                    pst(betrag[i][1], einh, 5)
+                    bestst=betrag[i][0]
+                    if bestst==1:
+                        p("1 Muenzen Ausstieg",8)
+                        break
+        else:
+            p("regulaerer ausstieg: i= "+str(i),8)
 
 
     
@@ -118,11 +135,21 @@ def negval(v):
         return float('-inf')
 
 def findminstep(z):
-    n=0
+    st=str(z).rstrip("0")
+    f=0
+    if st[-1]==".":
+        st=st.rstrip(".")
+    elif "." in st:
+        f=len(st)-st.index(".")-1
+        return 10**-f
+    i=1
     while True:
-        if z>10**-n:
-            return 10**-n
-        n=n+1
+        if st[-i]=="0":
+            f=f+1
+            i=i-1
+        else:
+            return 10**f
+
 
 def muenzzahl_zero(stueck):
     l=dict()
@@ -164,10 +191,10 @@ def steinh(stri):
     else:
         return [["Einheiten",1]]
 
-def rek_stueckgen(funktstri, maxstueck):
-    for ch in funktstri:
-        if ch=="^":
-            pass
+##def rek_stueckgen(funktstri, maxstueck):
+##    for ch in funktstri:
+##        if ch=="^":
+##            pass
 
 
 def pst(std, einh,  v):
