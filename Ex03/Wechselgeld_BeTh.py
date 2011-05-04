@@ -12,11 +12,17 @@ def main():
 ## Comandline optionen verarbeiten
     parser=argparse.ArgumentParser(description="Loest das Wechselgeldproblem.")
     parser.add_argument("-v", nargs='?', type=int , help="Setzt den Verbositylevel zur angegebenen Zahl", default=5, const=6)
-    parser.add_argument("Wechselgeld" , type=float, help="Gibt das Geld an, das herausgegeben wird.", default=0)
+    parser.add_argument("Wechselgeld" ,  help="Gibt das Geld an, das herausgegeben wird. Einheiten können optional NACHGESTELLT angegeben werden, wobei mit der groessten Einheit begonnen werden muss!", default=0)
     parser.add_argument("-s","--stueck", nargs='+', type=float, help="Manuelle Eingabe der Stueckelung. Nur ganze Zahlen sind erlaubt")
     parser.add_argument("-w","--waehrung", nargs='+', help="Gibt das/die Waehrungssymbol(e) an, beginnend mit dem kleinsten!")
     parser.add_argument("-u","--umrechnung", nargs='*', type=float, default=1, help="Gibt die Gewichtung der einzelnen Waehrungssymbole an. Beispiel Euro: Wurden die Waehrungssymbole als E c eingegeben, so ist hier 1 0.01 einzugeben. Für die Waehrungssymbole c E reicht 0.01")
     parser.add_argument("-d","--d_stueck", nargs='?', choices=["e","euro","p10", "p100", "p10*", "p100*", "T"], help="Waehlt eine standard Stueckelung und Waehrungssymbole: e=euro, p10: 1 und Primzahlen bis 10, p100 1 und Primzahlen bis 100, ein angefüger Stern * nimmt 1 aus. T=Taler")
+    parser.add_argument("--allowoverkill", action=store_true, default=False, help="Das Programm berechnet auch Loesungen wo durch herausgabe von zuviel Geld Muenzen gespart werden koennen.")
+    parser.add_argument("--ok_proz", nargs=1, default=00, type=int, help="Nur sinnvoll wenn --allowoverkill angegeben ist. Limitiert den Bereich, in dem overkill-Loesungen gesucht werden auf den angegebenen prozentwert in bezug auf das herauszugebende Wechselgeld")
+    parser.add_argument("--stgen_rek", help="Generiert die Stueckelung als Folge deren rekursive Darstellung als string angegeben wird. Unterstuetzt ZAHL (kleinstes Stueck, default 1) +ZAHL, *ZAHL ^ZAHL  Die Argumente werden als verkettete Funktionen verstanden mit der linkesten als innersten. Die Folge muss streng monoton steigen!")
+
+
+
     args=parser.parse_args()
     _verbosity=args.v
     p("Input",10)
@@ -32,7 +38,7 @@ def main():
         
     if args.waehrung==None:
         if args.d_stueck==None:
-            einh=[["E", 1.0],["c", 0.01]]
+            einh=steinh("e")
     else:
         for ws in args.waehrung:
             einh.append([ws,1.0])
@@ -44,11 +50,16 @@ def main():
     p("Einheiten= "+str(einh), 6)
     p("Stueckelung= "+str(stueck), 6)
     p("Wechselgeldbetrag= "+str(args.Wechselgeld),6)
-    a=args.Wechselgeld
+    a=geldberechnen(args.Wechselgeld, einh)
     betrag=dict()
     betrag[a]=[0, muenzzahl_zero(stueck)]
     p("Urspruengliches dictionary" + str(betrag),10)
 
+    overk=args.allowoverkill
+    okproz=args.ok_proz
+
+
+ 
     minstep=findminstep(stueck[0])
 
     b=a
@@ -76,11 +87,27 @@ def main():
     else:
         i=max(betrag.keys(), key=negval)
         p("Kein exaktes Resultat!", 5)
-        p("Gib "+str(-i) + "zuviel heraus. Insgesamt: " + str(a-i), 4)
-
+        p("Gib "+str(-i) + " zuviel heraus. Insgesamt: " + str(a-i), 4)
     p("Gebraucht werden "+str(betrag[i][0])+" Geldstuecke", 0)
     p("Beste Stueckelung:",5)
     pst(betrag[i][1], einh, 5)
+    
+    bestst=betrag[i][1]
+    if overk==True:
+        while True:
+            i=round(i-minstep,6)
+            if okproz>0:
+                if i<-a*okproz/100:
+                    break
+            if bestst<=a/stueck[-1]:
+                break 
+            if betrag[i][1]<bestst:
+                p("Alternative Loesung:",5)
+                p("Gib "+str(-i) + " zuviel heraus. Insgesamt: " + str(a-i), 4)
+                p("Gebraucht werden "+str(betrag[i][0])+" Geldstuecke", 0)
+                p("Beste Stueckelung:",5)
+                pst(betrag[i][1], einh, 5)
+
 
 
     
@@ -131,13 +158,16 @@ def ststueck(stri):
     
 def steinh(stri):
     if stri in ["e","euro"]:
-        return [["c", 0.01],["E", 1]]
+        return [["cent", 0.01],["c", 0.01],["Euro", 1],["E", 1]]
     elif stri in ["T"]:
-        return [ ["Pfennige", 1],["Groschen", 12], ["1/12 Taler", 24],["1/6 Taler", 48],["1/4 Taler", 72],["1/3 Taler", 96],["1/2 Taler", 144], ["Taler",288]]
+        return [ ["p", 12],["Pfennige", 1],["g", 12],["Groschen", 12], ["1/12 Taler", 24],["1/6 Taler", 48],["1/4 Taler", 72],["1/3 Taler", 96],["1/2 Taler", 144],["T",288], ["Taler",288]]
     else:
         return [["Einheiten",1]]
 
-
+def rek_stueckgen(funktstri, maxstueck):
+    for ch in funktstri:
+        if ch=="^":
+            pass
 
 
 def pst(std, einh,  v):
@@ -145,6 +175,35 @@ def pst(std, einh,  v):
     for st in sorted(std.keys()):
         if std[st]>0:
             p(str(std[st])+" mal "+streinh(st, einh), v)
+
+def geldberechnen(stri, einheiten):
+    try:
+        stri=stri.lower()
+        geld=0.0
+        p("Pruefe Eingabe",8)
+        for einh in einheiten:
+            p("Pruefe einheit " +str(einh[0]),9)
+            if einh[0].lower() in stri:
+                p("Einheit vorhanden",9)
+                stli=stri.split(einh[0].lower())
+                p("stli= "+str(stli),10)
+                geld=geld+float(stli[0])*einh[1]
+                p("Neues Gesamtgeld= " +str(geld),10)
+                if len(stli)==1:
+                    stri=""
+                elif len(stli)==2:
+                    stri=stli[1]
+                elif len(stli)>2:
+                    p("Error. Jede Einheit darf maximal 1x angegeben werden",0)
+                p("stri wurde geaendert zu "+stri,9)
+        if stri!="":
+            geld=geld+float(stri)
+        p("Eingabe verarbeitet zu geld: "+str(geld),8)
+        return geld
+    except:
+        p("Fehler! Falsche Eingabe",0)
+        p("Eingabe konnte nicht verarbeitet werden. Beachte: Einheiten muessen nachgestellt werden und groessere Einheiten vor kleineren genannt werden, dazwischen eine Zahl. Jede Einheit darf maximal 1x vorkommen.",4)
+        exit()
 
 
 
