@@ -18,8 +18,8 @@ Liebe APBC-ler/innen,
       G => 0.2    -----/   UCUUCCUCCC
       U => 0.5             GUGCAUUUGU
 
-      (Anmerkung: Dieser Methode liefert natuerlich nur im ststistischen
-       mittel Zufallssequenzen mit den urspruenglich gemessenen Buchstaben-
+      (Anmerkung: Dieser Methode liefert natuerlich nur im statistischen
+       Mittel Zufallssequenzen mit den urspruenglich gemessenen Buchstaben-
        haefigkeiten. Jede einzelne Sequenz kann stark von diesen abweichen)
       
 
@@ -41,21 +41,22 @@ Liebe APBC-ler/innen,
       G     G	  G	G     G <-+ U	  U	U <-+ U <-+ U
 
       (Anmerkung: Diese Methode erhaelt exakt die Haeufigkeiten der
-       Buchstaben der Orginalsequenz)
+       Buchstaben der Orginalsequenz und wir ueblicherweise als
+       Fisher-Yates shuffle bezeichnet)
 
 (2) Zufallssequenzen (unter erhalt der k-lets)
 
-    Schreibe ein Programm, dasz eine Sequenz einliest und eine eine
-    zufaellige Sequenz erzeugt, welche die gleichen k-let Haeufigkeiten
-    besitzt wie die Orginalsequenz. Ein k-let ist eine subsequenz der
-    Laenge k (zB bein Dinukloeotid gehalt von Nukleinsaeuren ist k=2).
+    Schreibe ein Programm, dasz eine Sequenz einliest und eine zufaellige
+    Sequenz erzeugt, welche die gleichen k-let Haeufigkeiten besitzt wie
+    die Orginalsequenz. Ein k-let ist eine subsequenz der Laenge k (zB beim
+    Dinukleotidgehalt von Nukleinsaeuren ist k=2).
 
-    Der Shuffling Algorithmus funktioniert wie folgt:
+    Der k-let Shuffling Algorithmus funktioniert wie folgt:
 
     (a) wenn die Sequenz k-let geshuffelt werden soll, bestimme man alle
-        Subsequenzen der der Laenge k-1. (Sprich fuer Dinukleotids
-        shuffling ist das das Sequenzalphabet, fuer Trinukleotide shuffling
-        sind das alle Dinucleotide usw.)
+        Subsequenzen der Laenge k-1. (Sprich fuer Dinukleotid shuffling ist
+        das das Sequenzalphabet, fuer Trinukleotide shuffling sind das alle
+        Dinucleotide usw.)
 
      (b) die unter (a) bestimmten Subsequenzen bilden die Ecken eines
          Graphen (der anfaenglich keine Kanten besitzt).
@@ -69,11 +70,11 @@ Liebe APBC-ler/innen,
 
 	    G  C
 
-     (c) nun geht man den urspruenglichen Sequenze durch und setzt fuer
+     (c) nun geht man die urspruenglichen Sequenze durch und setzt fuer
          alle aufeinanderfolgenden k-lets eine entsprechende gerichtete
          Kante in den Graphen ein, wobei zwei Ecken auch durch mehrere
-         Kanten verbunden sein koennen (Sprich wir bauen eigentlich einen
-         Multigraphen)
+         Kanten verbunden sein koennen (Sprich es wird ein sogenannter
+         gerichteter Multigraph aufgebaut)
 	 
                  +-----+
                  |+---+|
@@ -86,7 +87,26 @@ Liebe APBC-ler/innen,
 	     vv   ||
 	      G-->C
 
-       (d) finde in diesem Multigraphen einen Eulerpfad. Ein Eulerpfad
-           durchwandert jede Kante des (Multi)Graphen exakt 1x.
+       (d) jeder Eulerpfad in diesem Multigraphen entspricht einer
+           geshuffelten Version der uespruenglichen Sequenzeinen unter
+           erhalt der k-let Haeufigkeiten. Ein Eulerpfad durchwandert jede
+           Kante des (Multi)Graphen exakt 1x.
+
+       (e) Die grosze Kunst ist nun eine Methode zu finden die aus allen
+           moeglichen Eulerpfaden im Multigraphen statistisch gleichverteilt
+           welche ziehen kann. Die beiden nachfolgenden Paper
+           kandel-DAM-96.pdf und jiang-BMC-Bioinf-08.pdf, setzen sich mit
+           diesem Problem auseinander:
+
+	   1. Kandel D et al (1996) Shuffling biological sequences.
+	      Discete Appl Math 71:171-185
+	      doi:10.1016/S0166-218X(97)81456-4
+	   
+	   2. Jiang M et al (2008) uShuffle: a useful tool for shuffling
+	      biological sequences while preserving the k-let counts.
+	      BMC Bioinformatics 9:192
+	      doi:10.1186/1471-2105-9-192
 
 happy hacking
+
+http://www.tbi.univie.ac.at/~xtof/Leere/270034/
