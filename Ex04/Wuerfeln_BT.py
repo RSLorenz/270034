@@ -15,6 +15,7 @@ import argparse
 import random
 import copy
 _verbosity=2
+random.seed()
 
 def main():
     global _verbosity
@@ -56,14 +57,16 @@ def main():
         if args.mode%8>=4:
             p("\n\nDuplets\n",2)
             erg=dict()
-            for i in range(50):
-                st=k_let(sequenz)
-                if st in erg.keys():
-                    erg[st]+=1
-                else:
-                    erg[st]=1
+            for i in range(5):
+                for j in range(300):
+                    st=k_let(sequenz)
+                    if st in erg.keys():
+                        erg[st][i]+=1
+                    else:
+                        erg[st]=[0,0,0,0,0]
+                        erg[st][i]=1
             for k in sorted(erg.keys()):
-                print(k+" "+str(erg[k]))
+                print(k+" "+str(erg[k])+ " " +str(sum(erg[k])))
     else:
         if args.mode%2==1:
             p("\nGewuerfelt:",2)
@@ -200,6 +203,8 @@ def findstx(gr):
     for i in range(len(gr)):
         if sum(gr[i])>sum(gr[x][i] for x in range(len(gr))):
             return i
+    r = random.randint(0,len(gr)-1)
+    return r
     
 
 def p(stri, v):
